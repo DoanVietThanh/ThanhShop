@@ -58,6 +58,7 @@ var userSchema = new mongoose.Schema(
   }
 );
 
+// Hash password before saving to DB
 userSchema.pre('save', async function (next) {
   // ko dùng arrow func vì ko định nghĩa dc 'this'
   if (!this.isModified('password')) {
@@ -66,6 +67,14 @@ userSchema.pre('save', async function (next) {
   const salt = await bcrypt.genSaltSync(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+// Check matched password
+userSchema.methods = {
+  isCorrectPssword: async function (password) {
+    // password: password from user
+    return await bcrypt.compare(password, this.password);
+  },
+};
 
 //Export the model
 module.exports = mongoose.model('User', userSchema);
